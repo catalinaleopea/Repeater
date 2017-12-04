@@ -46,6 +46,10 @@ int randomArray[100]; //il setez pana la nivelul 100 maxim
 unsigned long delayTime = 1000;
 int level = 0;
 
+int lifeLed1 = A0;
+int lifeLed2 = A1;
+int lives = 2;
+
 void setup(){
   lc.shutdown(0, false);
   lc.setIntensity(0, 8);
@@ -57,6 +61,10 @@ void setup(){
   pinMode(buttonLeft, INPUT);
   pinMode(buttonRight, INPUT);
   pinMode(buttonDown, INPUT);
+
+  pinMode(lifeLed1, OUTPUT);
+  pinMode(lifeLed2, OUTPUT);
+
 }
 
 //urmatoarele functii afiseaza intuitiv, dupa nume, un model pe matricea de LED-uri
@@ -266,6 +274,7 @@ int play(){
 
 //instructiunile pe care trebuie sa le execute in cazul in care jocul s-a terminat
 void fail(){
+  lives = 2;
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Game Over!");
@@ -293,6 +302,8 @@ void fail(){
 
 void Menu(){
   level = 0;
+  digitalWrite(lifeLed1, HIGH);
+  digitalWrite(lifeLed2, HIGH);
   lcd.setCursor(0, 0);
   lcd.print("REPEATER");
   lcd.setCursor(0, 1);
@@ -304,7 +315,22 @@ void Menu(){
       do{                        //repeta asta pana cand jocul se termina
         lcd.clear();
         result = play();
-      }while(result != 0);       //daca s-a terminat
+        if(result == 0 && lives == 2){//la prima greseala scad o viata
+          digitalWrite(lifeLed2,LOW);
+          lives--;
+          level--;
+        }
+        else
+         if(result == 0 && lives == 1){//la a doua greseala mai scad o viata
+            digitalWrite(lifeLed1,LOW);
+            lives--;
+            level--;
+          }
+          else
+            if(result == 0 && lives == 0){//am gresit si nu mai am vieti
+              lives--;
+            }
+      }while(lives >= 0);       //se termina cand nu mai am vieti
       fail();
       lcd.clear();
   }
